@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="form">
+        <input type="text" name="input" id="input" value="Type here">
+        <input type="button" name="input" id="go" value="Go" />
+    </div>
+    <h3>Digest:</h3>
+    <span id="output">Digest will be shown here</span>
+
+
+    <script src="./bundle.js"></script>
+    <script>
+        window.Module = {}
+        var Sha1 = {
+            digest: function (str) {
+                let buf = newString(Module, str);
+                let outptr = Module.digest(buf, 6);
+                let result = copyCStr(Module, outptr);
+                Module.dealloc(buf);
+                return result;
+            }
+        }
+
+        fetchAndInstantiate("./hashcash.wasm", {})
+            .then(mod => {
+                console.log('-----GO')
+                Module.alloc = mod.exports.alloc;
+                Module.dealloc = mod.exports.dealloc;
+                Module.dealloc_str = mod.exports.dealloc_str;
+                Module.digest = mod.exports.digest;
+                Module.memory = mod.exports.memory;
+
+                go.addEventListener("click", function (e) {
+                    var input = document.getElementById("input");
+                    var output = document.getElementById("output");
+                    var t0 = performance.now();
+                    output.innerText = Sha1.digest(input.value);
+                    var t1 = performance.now();
+                    console.log(`Nonce took ${t1 - t0}  milliseconds.`)
+                });
+            });
+    </script>
+</body>
+
+</html>
